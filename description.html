@@ -1,0 +1,132 @@
+
+<H2>Trabalhos</H2>
+
+<H4>Parte 1</H4>
+
+<P>
+Implemente um buffer compartilhado.
+Em um buffer, pode-se colocar uma quantidade qualquer de dados, de qualquer tamanho (limitado à sua capacidade).
+Os dados são retirados do buffer na ordem em que entraram, inteiros (uma operação de remoção não pode deixar parte dos dados que foram colocados em uma operação de inserção -- os dados podem não ser integralmente lidos, mas devem ser removidos do buffer).
+Os dados não devem ser movidos no interior do buffer (a remoção de um dado não deve provocar o deslocamento dos dados que restam no buffer).
+Um dado pode ser colocado em dois pedaços no interior do buffer (um pedaço no final do espaço e sua continuação no início).
+</P>
+<P>
+Deve existir uma função para a inicialização de um buffer, que recebe a capacidade desejada para o buffer, em bytes.
+</P>
+<P>
+Deve existir uma função de inserção em um buffer, que recebe os bytes a serem inseridos no buffer, e sua quantidade. A quantidade pode ser zero.
+</P>
+<P>
+Deve existir uma função de remoção do buffer, que deve fornecer um local onde colocar os dados retirados. Devem ser removidos do buffer os dados que correspondem a uma inserção. Quem chama a função de remoção deve fornecer informação de capacidade do local onde os dados devem ser colocados, e deve receber informacao sobre a quantidade de dados efetivamente colocados nesse local.
+</P>
+<P>
+Os dados são retirados na mesma ordem em que foram inseridos.
+</P>
+<P>
+Uma thread bloqueia na remoção, enquanto o buffer estiver vazio.
+</P>
+<P>
+Uma thread bloqueia na inserção enquanto não houver espaço suficiente no buffer.
+</P>
+<P>
+Em caso de bloqueio na inserção ou remoção, deve ser formada uma fila, respeitando a ordem de chegada das threads.
+</P>
+<P>
+O buffer deve ser implementado em detalhes (não pode usar estruturas fornecidas pela linguagem ou bibliotecas). A fila de processos pode usar estruturas já implementadas, mas a proteção ao uso concorrente dessas estruturas deve ser implementada (não pode usar implementações que sejam thread-safe).
+</P>
+<P>
+O buffer principal deve ser implementado como uma única região de memória (não pode-se usar encadeamento de cada inserção). Não se pode usar alocação dinâmica na sequencia normal de inserção e remoção, quando não tem bloqueio.
+</P>
+<P>
+Exemplo de API C:
+</P>
+
+<PRE>
+#include &lt;stdbool.h&gt;
+
+typedef struct {
+  // coloque aqui o que for necessário para a implementacao
+} buffer;
+
+// Inicializa um buffer com capacidade para ``cap`` bytes.
+// Deve ser possível usar-se quantos buffers se quiser.
+// Retorna um ponteiro para o buffer alocado, ou NULL se der problema.
+buffer *buffer_inicializa(int cap);
+
+// Finaliza um buffer previamente inicializado.
+// Todos os dados eventualmente em seu interior são perdidos.
+// A memória alocada na inicialização deve ser liberada.
+// Após esta chamada, o buffer não pode mais ser utilizado.
+void buffer_finaliza(buffer *buf);
+
+// insere em ``buf`` o dado apontado por ``p``, contendo ``tam`` bytes.
+// ``tam`` pode ser 0, mas não pode ser negativo.
+// retorna ``false`` (e não altera o estado do buffer) caso não seja
+// possível.
+// retorna ``true`` caso o dado tenha sido inserido no buffer.
+bool buffer_insere(buffer *buf, void *p, int tam);
+
+// remove o próximo dado de ``buf``, colocando-o na região apontada por ``p``,
+// que tem capacidade para ``cap`` bytes. Caso o próximo dado seja maior
+// que ``cap``, os dados são truncados, e o que não couber em ``p`` é
+// perdido. Coloca em ``*tam`` o tamanho original do dado retirado (que pode ser
+// menor, igual ou maior que ``cap``).
+// ``cap`` pode ser 0. ``p`` pode ser NULL (nesse caso, ``cap`` deve ser 0).
+// Retorna ``true`` se for bem sucedido, e ``false`` caso contrário.
+bool buffer_remove(buffer *buf, void *p, int cap, int *tam);
+</PRE>
+
+<H4>Parte 2</H4>
+
+<P>
+Meça o desempenho de sua implementação, em várias situações.
+As várias situações devem envolver variações no número de threads envolvidas (pelo menos 1-&gt;1, 1-&gt;N, N-&gt;1, N-&gt;M (número de threads escritoras -&gt; número de threads leitoras)), tamanho das escritas (desde alguns bytes até centenas de quilobytes).
+</P>
+
+<H4>Parte 3</H4>
+
+<P>
+Encontre dados a respeito de uma unidade de disquete dos anos 80 ou 90.
+Sugiro dos anos 80, que são mais simples e lentas.
+Tem que ser dupla face.
+Descubra, no mínimo: velocidade de rotação, número de trilhas, número de setores por trilha, tempo para trocar de uma trilha para outra adjacente.
+</P>
+<P>
+Implemente uma simulação de disco com esses dados. Sua simulação deve ter uma imagem do disco (armazenada em um arquivo), receber pedidos de leitura e de gravação de blocos do disco, e demorar para responder cada pedido o tempo aproximado que o disco real demoraria.
+Deve ser incluído nesse tempo o tempo de busca pelo cilindro certo, o tempo de seleção do cabeçote (se não tiver esse tempo, considere 1/10 do tempo de busca de uma trilha), o tempo de espera rotacional, o tempo de transferência do disco para a controladora e o tempo de transferência para a memória.
+Para o tempo de espera rotacional, considere que o disco esteja sincronizado com o relógio do sistema: na hora que troca de segundo no relógio o cabeçote 0 da trilha 0 está sobre o intervalo logo antes do setor 0.
+</P>
+<P>
+A interface de acesso a essa simulação deve ser uma função, que recebe a identificação do setor (pode ser um número linear começando em 0 ou uma tupla &lt;cilindro, superfície, setor&gt;), o tipo de acesso (leitura ou gravação) e um buffer para os dados (um vetor de 512 bytes).
+A função deve fazer a transferência dos dados e aguardar o tempo correspondente ao acesso, antes de retornar.
+</P>
+<P>
+Faça uma outra função, que chama a anterior, e implementa entrelaçamento de setores, alterando a numeração dos setores.
+</P>
+<P>
+Faça um programa para medir o desempenho do seu disco em leitura e gravação, sequencial ou aleatório. Descubra o melhor fator de entrelaçamento.
+</P>
+
+<H4>Parte 4 (última)</H4>
+
+<P>
+Implemente acesso ao seu disco simulado usando threads no modo cliente-servidor.
+As threads comunicam por meio de buffers compartilhados (do início do trabalho).
+Tem uma thread servidora (a que implementa o disco, usando a parte 3) e potencialmente várias threads clientes.
+Cada thread tem um buffer compartilhado, usado para ela receber mensagens.
+Todas as threads clientes podem inserir no buffer da thread servidora.
+Elas usam isso para fazer um pedido de acesso ao disco.
+A thread servidora pode inserir no buffer de qualquer thread cliente. 
+Ela usa isso para enviar uma resposta a um pedido de acesso ao disco.
+Um pedido é um pacote inserido no buffer da thread servidora, contendo a identificacao do setor, a operacao (leitura ou gravacao), a identificacao do buffer de resposta e, no caso de uma operacao de gravacao, os 512 bytes a gravar no setor.
+Uma resposta é um pacote inserido no buffer da thread cliente pela thread servidora, contendo o resultado da operacao (OK ou não) e, no caso de uma operação de leitura bem sucedida, os 512 bytes do setor lido.
+</P>
+<P>
+A thread servidora deve manter uma fila de pedidos recebidos e ainda não processados.
+Cada vez que essa thread fica livre, ela lê todos os pedidos existentes no buffer compartilhado e os coloca na fila (talvez tenha que alterar a API do buffer compartilhado para ser possível esvaziar o buffer sem bloquear).
+Depois, escolhe um pedido da fila e processa ele, chamando a função da parte 3.
+Quando a função retornar, coloca o resultado no buffer de resposta e volta a verificar seu buffer de recepção de pedidos.
+</P>
+<P>
+A thread servidora deve poder ser configurada para retirar os pedidos da fila pelo menos em duas ordens: FCFS (fila normal, retirada na ordem de entrada) e elevador (retira de acordo com o número do cilindro do pedido, o número do cilindro do último acesso ao disco e o sentido de varredura desses cilindros).
+</P>
