@@ -1,2 +1,2 @@
-# UFSM-ELC1080
-Disciplina de Sistemas Operacionais
+# Sistemas Operacionais
+2018-2
