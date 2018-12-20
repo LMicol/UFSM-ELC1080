@@ -1,3 +1,4 @@
+#include <stdbool.h>
 /* Buffer principal da implementção
 todas as estruturas utilizadas estão criadas dentro da struct */
 typedef struct buff buffer;
