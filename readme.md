@@ -1,8 +1,8 @@
 # Sistemas Operacionais
-Trabalho Final da Disciplina<br/>
-Implementado por:<br/>
-Lucas Micol<br/>
-(Claiton Neisse)[https://github.com/lokijuhygb]<br/>
+Trabalho Final da Disciplina
+Implementado por:
+* Lucas Micol
+* [Claiton Neisse](https://github.com/lokijuhygb)
 
 Compilar com:<br/>
 $ gcc -o cliente-servidor main.c buffer.c lista.c disco.c -pthread -Wall -Wextra -pedantic
